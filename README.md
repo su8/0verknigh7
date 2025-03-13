@@ -1,5 +1,41 @@
 # 0verknigh7
-Small Rogue c++ game that I found on reddit - https://www.reddit.com/r/roguelikedev/comments/oa2t42/simple_roguelike_on_pure_c/ , hats off to https://www.reddit.com/user/Olexey1313/ who shared the game and I forked it here
+Small Rogue c++ game that I found on reddit - https://www.reddit.com/r/roguelikedev/comments/kxannr/quest_for_the_orb_a_minimal_roguelike_in_317/ , hats off to https://www.reddit.com/user/aotdev/ who shared the game and I forked it here
+
+### Features:
+
+Turn-based
+
+Permadeath
+
+Infinite procedurally generated dungeon
+
+Victory condition: retrieve the orb! Legend says it lies somewhere between levels 16-25
+
+What can you do in the game?
+
+Explore! Walking to a wall or pressing random keys skips a turn
+
+Collect treasure: just walk over it
+
+Avoid the rotating disc-blades: They move always towards a random direction except the one they came from, and they bounce off dead-ends
+
+Destroy neighbouring walls and disc-blades with dynamite. But be careful, you have only 3!
+
+Find the stairs to the next level, hoping to find the orb there
+
+You can walk off the edge of the map and come out the other side, if there is a floor there
+
+Input configuration: map your own keys. Don't use arrow keys on repl.it though, as they misbehave.
+
+Increasing difficulty: there are more disc-blades deeper into the dungeon
+
+Welcome screen in glorious ASCII HD
+
+Victory screen in glorious ASCII HD with derived score from turn count, treasure and dynamites left
+
+UI showing step count, treasure collected, level and dynamites left
+
+---
 
 # Compile
 
