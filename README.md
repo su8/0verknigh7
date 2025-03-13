@@ -5,7 +5,7 @@ Small Rogue c++ game that I found on reddit - https://www.reddit.com/r/roguelike
 
 ### Features:
 
-Turn-based
+ [*] Turn-based
 
 Permadeath
 
