@@ -16,14 +16,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 MA 02110-1301, USA.
 */
 #include <iostream>
+#include <cstdlib>
 #include <random>
 #include <algorithm>
 #include <array>
 #include <vector>
 
+int read_key(void);
+
 #ifdef _WIN32
 #include <conio.h>
-int read_key()
+int read_key(void)
 {
     int c = _getch();
     if (c == 0 || c == 224) // in some cases on windows(?), pressing arrow keys returns two of these values, where the first is 0 or 224.  
@@ -33,7 +36,7 @@ int read_key()
 #else
 #include <termios.h>
 #include <unistd.h>
-int read_key() 
+int read_key(void) 
 {
    char buf = 0;
    struct termios old = {0};
@@ -81,6 +84,25 @@ int dynamite = 0;
 ivec2 hero;
 vector<pair<ivec2,int>> enemy_position_and_last_direction;
 
+// function prototypes
+void bit_set(uint8_t& bits, int pos);
+void bit_clear(uint8_t& bits, int pos);
+bool bit_test(uint8_t& bits, int pos);
+bool oob(ivec2 p);
+bool oobb(ivec2 p);
+uint8_t &mapelem(ivec2 p);
+void setup_keys(void);
+void create_iteration(ivec2 p);
+void place_feature(int feature_bit, int num);
+void clearscreen(void);
+void display(void);
+void create_level(int seed);
+void startgame(void);
+void use_dynamite(void);
+void move(int feature_bit, ivec2& from, ivec2 to);
+void win(void);
+void welcome(void);
+
 void bit_set(uint8_t& bits, int pos) { bits |= 1 << pos; }
 void bit_clear(uint8_t& bits, int pos) { bits &= ~(1UL << pos); }
 bool bit_test(uint8_t& bits, int pos) { return bits & (1 << pos); }
@@ -92,7 +114,7 @@ bool oobb(ivec2 p) { return p.x <= 0 || p.y <= 0 || p.x >= (dims.x-1) || p.y >= 
 // get the map element at position
 uint8_t& mapelem(ivec2 p) { return map[p.x + p.y * dims.x]; }
 
-void setup_keys()
+void setup_keys(void)
 {
     int i = 0;
     cout<<"Press key for ";
@@ -133,9 +155,9 @@ void place_feature(int feature_bit, int num)
             }
 }
 
-void clearscreen() { cout << "\033[2J\033[0;0H"; }
+void clearscreen(void) { cout << "\033[2J\033[0;0H"; }
 
-void display()
+void display(void)
 {
     static const vector<string> reqColour = {"\033[1;32m@\033[0;0m", "\033[1;31mD\033[0;0m", "\033[1;33m$\033[0;0m", "\033[1;34m>\033[0;0m"};
     static const char reqChar[] = {'@', 'D', '$', '>'};
@@ -206,7 +228,7 @@ void create_level(int seed)
     }
 }
 
-void startgame()
+void startgame(void)
 {
     treasure = 0;
     level = 0;
@@ -216,7 +238,7 @@ void startgame()
 }
 
 // dynamite clears neighbour walls and enemies
-void use_dynamite()
+void use_dynamite(void)
 {
   --dynamite;
   auto& vec = enemy_position_and_last_direction;
@@ -231,7 +253,7 @@ void use_dynamite()
   }
 }
 
-void win() // ansi shadow font from TAAG
+void win(void) // ansi shadow font from TAAG
 {
   clearscreen();
   cout<<"\n\n"<< R"(
@@ -252,7 +274,7 @@ getchar();
 startgame();
 }
 
-void welcome() // ansi shadow font from TAAG
+void welcome(void) // ansi shadow font from TAAG
 {
   cout << "\n\n"<<R"(
  ██████╗ ██╗   ██╗███████╗███████╗████████╗    ███████╗ ██████╗ ██████╗     
@@ -290,7 +312,7 @@ void move(int feature_bit, ivec2& from, ivec2 to)
         create_level(time(NULL));
 }
 
-int main() {
+int main(void) {
     welcome(); // show welcome screen
     setup_keys(); // setup movement, dynamite and restart game keys
     startgame(); 
@@ -343,4 +365,5 @@ int main() {
             }
         }
     }
+    return EXIT_SUCCESS;
 }
