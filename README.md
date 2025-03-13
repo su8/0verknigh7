@@ -1,6 +1,8 @@
 # 0verknigh7
 Small Rogue c++ game that I found on reddit - https://www.reddit.com/r/roguelikedev/comments/kxannr/quest_for_the_orb_a_minimal_roguelike_in_317/ , hats off to https://www.reddit.com/user/aotdev/ who shared the game and I forked it here
 
+![](1snap.png)
+
 ### Features:
 
 Turn-based

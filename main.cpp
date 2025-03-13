@@ -147,7 +147,24 @@ void display()
             for (int j = 0; j <= HERO; ++j)
                 if (m & (1 << j))
                     c = symbols[j];
-            cout << c;
+
+            switch(c) {
+                case '@':
+                    cout << "\033[1;32m@\033[0;0m";
+                    break;
+                case 'D':
+                    cout << "\033[1;31mD\033[0;0m";
+                    break;
+                case '$':
+                    cout << "\033[1;33m$\033[0;0m";
+                    break;
+                case '>':
+                    cout << "\033[1;34m>\033[0;0m";
+                    break;
+                default:
+                    cout << c;
+                    break;
+            }
         }
         if      (y == (dims.y - 1)) cout << "  Level:    " << level;
         else if (y == (dims.y - 2)) cout << "  Treasure: " << treasure;
