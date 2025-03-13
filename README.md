@@ -1,4 +1,4 @@
-# 0verknigh7
+# 0verknigh7  [![C/C++ CI](https://github.com/su8/0verknigh7/actions/workflows/c-cpp.yml/badge.svg?branch=main)](https://github.com/su8/0verknigh7/actions/workflows/c-cpp.yml)
 Small Rogue c++ game that I found on reddit - https://www.reddit.com/r/roguelikedev/comments/kxannr/quest_for_the_orb_a_minimal_roguelike_in_317/ , hats off to https://www.reddit.com/user/aotdev/ who shared the game and I forked it here
 
 ![](1snap.png)
