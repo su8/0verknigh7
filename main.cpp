@@ -137,6 +137,9 @@ void clearscreen() { cout << "\033[2J\033[0;0H"; }
 
 void display()
 {
+    static const vector<string> reqColour = {"\033[1;32m@\033[0;0m", "\033[1;31mD\033[0;0m", "\033[1;33m$\033[0;0m", "\033[1;34m>\033[0;0m"};
+    static const char reqChar[] = {'@', 'D', '$', '>'};
+
     clearscreen();
     for (int y = dims.y - 1; y >= 0; --y)
     {
@@ -147,24 +150,18 @@ void display()
             for (int j = 0; j <= HERO; ++j)
                 if (m & (1 << j))
                     c = symbols[j];
-
-            switch(c) {
-                case '@':
-                    cout << "\033[1;32m@\033[0;0m";
+            unsigned short int increment = 0;
+            unsigned short int foundReqChar = 0U;
+            for (auto &key : reqColour) {
+                if (reqChar[increment] == c) {
+                    cout << key;
+                    foundReqChar = 1U;
                     break;
-                case 'D':
-                    cout << "\033[1;31mD\033[0;0m";
-                    break;
-                case '$':
-                    cout << "\033[1;33m$\033[0;0m";
-                    break;
-                case '>':
-                    cout << "\033[1;34m>\033[0;0m";
-                    break;
-                default:
-                    cout << c;
-                    break;
+                }
+                increment++;
             }
+           if (foundReqChar == 0)
+               cout << c;
         }
         if      (y == (dims.y - 1)) cout << "  Level:    " << level;
         else if (y == (dims.y - 2)) cout << "  Treasure: " << treasure;
