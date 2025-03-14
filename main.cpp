@@ -88,19 +88,19 @@ int read_key(void)
    fflush(stdout);
    if(tcgetattr(0, &old) < 0)
        perror("tcsetattr()");
-   old.c_lflag &= (~ICANON) & (~ECHO);
-   old.c_cc[VMIN] = 1;
-   old.c_cc[VTIME] = 0;
+   old.c_lflag &= (~ICANON) & (~ECHO); // local modes = Non Canonical mode and Disable echo
+   old.c_cc[VMIN] = 1;  // control chars (MIN value) = 1
+   old.c_cc[VTIME] = 0; // control chars (TIME value) = 0 (No time)
    if(tcsetattr(0, TCSANOW, &old) < 0)
        perror("tcsetattr ICANON");
    if(read(0, &buf, 1) < 0)
        perror("read()");
-   old.c_lflag |= ICANON | ECHO;
+   old.c_lflag |= ICANON | ECHO; // local modes = Canonical mode and Enable echo
    if(tcsetattr(0, TCSADRAIN, &old) < 0)
        perror("tcsetattr ~ICANON");
    return buf;
 }
-#endif
+#endif /* _WIN32 */
 
 void bit_set(uint8_t& bits, int pos) { bits |= 1 << pos; }
 void bit_clear(uint8_t& bits, int pos) { bits &= ~(1UL << pos); }
@@ -180,7 +180,7 @@ void display(void)
                 }
                 increment++;
             }
-           if (foundReqChar == 0U)
+            if (foundReqChar == 0U)
                cout << c;
         }
         if      (y == (dims.y - 1)) cout << "  Level:    " << level;
