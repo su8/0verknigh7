@@ -22,8 +22,6 @@ MA 02110-1301, USA.
 #include <array>
 #include <vector>
 
-using namespace std;
-
 struct ivec2 // our basic 2d point plus a few operations
 {
     int x = 0;
@@ -35,19 +33,19 @@ struct ivec2 // our basic 2d point plus a few operations
 };
 
 enum {FLOOR =0, EXIT, TREASURE, ORB, ENEMY, HERO}; // cell flags, in display order
-constexpr array<ivec2, 4> nbo{ivec2{1,0},{0,1},{-1,0},{0,-1}}; // direction offsets
+constexpr std::array<ivec2, 4> nbo{ivec2{1,0},{0,1},{-1,0},{0,-1}}; // direction offsets
 constexpr char symbols[] = ".>$YD@"; // symbols for the bit defines
 constexpr ivec2 dims{ 33,21 };       // map dimensions
 
 /// Game state
 int keys[6];
-array<uint8_t, dims.x* dims.y> map;
+std::array<uint8_t, dims.x* dims.y> map;
 int treasure = 0; // collected treasure
 int level = 0;
 int steps = 0;
 int dynamite = 0;
 ivec2 hero;
-vector<pair<ivec2,int>> enemy_position_and_last_direction;
+std::vector<std::pair<ivec2,int>> enemy_position_and_last_direction;
 
 // function prototypes
 int read_key(void);
@@ -116,10 +114,10 @@ uint8_t& mapelem(ivec2 p) { return map[p.x + p.y * dims.x]; }
 void setup_keys(void)
 {
     int i = 0;
-    cout<<"Press key for ";
+    std::cout<<"Press key for ";
     for (auto text : { "RIGHT",", UP",", LEFT",", DOWN",", DYNAMITE", " and RESTART" })
     {
-        cout<<text;
+        std::cout<<text;
         keys[i++] = read_key();
     }
 }
@@ -128,8 +126,8 @@ void setup_keys(void)
 void create_iteration(ivec2 p)
 {
     // for each of the 4 directions, in random order
-    array<int, 4> dir4_index{ 0,1,2,3 };
-    random_shuffle(dir4_index.begin(), dir4_index.end());
+    std::array<int, 4> dir4_index{ 0,1,2,3 };
+    std::random_shuffle(dir4_index.begin(), dir4_index.end());
     for (auto i : dir4_index)
     {
         auto nb = p + nbo[i] * 2; // get the nb coord
@@ -154,11 +152,11 @@ void place_feature(int feature_bit, int num)
             }
 }
 
-void clearscreen(void) { cout << "\033[2J\033[0;0H"; }
+void clearscreen(void) { std::cout << "\033[2J\033[0;0H"; }
 
 void display(void)
 {
-    static const vector<string> reqColour = {"\033[1;32m@\033[0;0m", "\033[1;31mD\033[0;0m", "\033[1;33m$\033[0;0m", "\033[1;34m>\033[0;0m", "\033[1;35mY\033[0;0m"};
+    static const std::vector<std::string> reqColour = {"\033[1;32m@\033[0;0m", "\033[1;31mD\033[0;0m", "\033[1;33m$\033[0;0m", "\033[1;34m>\033[0;0m", "\033[1;35mY\033[0;0m"};
     static const char reqChar[] = {'@', 'D', '$', '>', 'Y'};
     clearscreen();
     for (int y = dims.y - 1; y >= 0; --y)
@@ -174,20 +172,20 @@ void display(void)
             unsigned short int foundReqChar = 0U;
             for (const auto &key : reqColour) {
                 if (reqChar[increment] == c) {
-                    cout << key;
+                    std::cout << key;
                     foundReqChar = 1U;
                     break;
                 }
                 increment++;
             }
             if (foundReqChar == 0U)
-               cout << c;
+            std::cout << c;
         }
-        if      (y == (dims.y - 1)) cout << "  Level:    " << level;
-        else if (y == (dims.y - 2)) cout << "  Treasure: " << treasure;
-        else if (y == (dims.y - 3)) cout << "  Dynamite: " << dynamite;
-        else if (y == (dims.y - 4)) cout << "  Steps:    " << steps;
-        cout << '\n';
+        if      (y == (dims.y - 1)) std::cout << "  Level:    " << level;
+        else if (y == (dims.y - 2)) std::cout << "  Treasure: " << treasure;
+        else if (y == (dims.y - 3)) std::cout << "  Dynamite: " << dynamite;
+        else if (y == (dims.y - 4)) std::cout << "  Steps:    " << steps;
+        std::cout << '\n';
     }
 }
 
@@ -196,7 +194,7 @@ void create_level(int seed)
     ++level;
     srand(seed); // seed the randomiser
     map.fill(0); // clear the map
-    ivec2 p = { (rand() % (dims.x-1)) | 1, (rand() % (dims.y-1)) | 1 }; // pick a point (odd coords) and carve it
+    ivec2 p = { (std::rand() % (dims.x-1)) | 1, (std::rand() % (dims.y-1)) | 1 }; // pick a point (odd coords) and carve it
     mapelem(p) = 1;
     create_iteration(p); // run the algorithm
     bit_set( mapelem(p) , HERO);
@@ -204,7 +202,7 @@ void create_level(int seed)
     place_feature(ENEMY, 4+level); 
     place_feature(EXIT, 1); 
     int orbchance = 10*(level-15);
-    if( (rand()%100) < orbchance)
+    if( (std::rand()%100) < orbchance)
       place_feature(ORB, 1); 
     enemy_position_and_last_direction.clear();
     hero = p;
@@ -254,7 +252,7 @@ void use_dynamite(void)
 void win(void) // ansi shadow font from TAAG
 {
   clearscreen();
-  cout<<"\n\n"<< R"(
+  std::cout<<"\n\n"<< R"(
 ██╗   ██╗ ██████╗ ██╗   ██╗    ██╗    ██╗ ██████╗ ███╗   ██╗
 ╚██╗ ██╔╝██╔═══██╗██║   ██║    ██║    ██║██╔═══██╗████╗  ██║
  ╚████╔╝ ██║   ██║██║   ██║    ██║ █╗ ██║██║   ██║██╔██╗ ██║
@@ -262,19 +260,19 @@ void win(void) // ansi shadow font from TAAG
    ██║   ╚██████╔╝╚██████╔╝    ╚███╔███╔╝╚██████╔╝██║ ╚████║
    ╚═╝    ╚═════╝  ╚═════╝      ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═══╝
 )";
-cout << "\n... as the mighty orb is yours to wield!\n\n";
+std::cout << "\n... as the mighty orb is yours to wield!\n\n";
 constexpr char tabs[] = "\t\t\t\t\t";
-cout << tabs<<"Treasure    : "<<treasure<<'\n';
-cout << tabs<<"Steps       : "<<steps<<"\n\n";
-cout << tabs<<"Dynamite    : "<<dynamite<<"\n\n";
-cout << tabs<<"Total score : "<< int((treasure + 10*dynamite)*1000/(float)(steps+1))<<'\n';
+std::cout << tabs<<"Treasure    : "<<treasure<<'\n';
+std::cout << tabs<<"Steps       : "<<steps<<"\n\n";
+std::cout << tabs<<"Dynamite    : "<<dynamite<<"\n\n";
+std::cout << tabs<<"Total score : "<< int((treasure + 10*dynamite)*1000/(float)(steps+1))<<'\n';
 getchar();
 startgame();
 }
 
 void welcome(void) // ansi shadow font from TAAG
 {
-  cout << "\n\n"<<R"(
+  std::cout << "\n\n"<<R"(
  ██████╗ ██╗   ██╗███████╗███████╗████████╗    ███████╗ ██████╗ ██████╗     
 ██╔═══██╗██║   ██║██╔════╝██╔════╝╚══██╔══╝    ██╔════╝██╔═══██╗██╔══██╗    
 ██║   ██║██║   ██║█████╗  ███████╗   ██║       █████╗  ██║   ██║██████╔╝    
@@ -338,7 +336,7 @@ int main(void) {
         // Play all enemies
         for (auto& e : enemy_position_and_last_direction)
         {
-            int i0 = rand() % 4; // pick random start dir
+            int i0 = std::rand() % 4; // pick random start dir
             bool moved = false;
             for (int i = 0; i<4;++i) // try all dirs, starting at the random one
             {
