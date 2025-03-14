@@ -22,41 +22,6 @@ MA 02110-1301, USA.
 #include <array>
 #include <vector>
 
-int read_key(void);
-
-#ifdef _WIN32
-#include <conio.h>
-int read_key(void)
-{
-    int c = _getch();
-    if (c == 0 || c == 224) // in some cases on windows(?), pressing arrow keys returns two of these values, where the first is 0 or 224.  
-        c = _getch() + (c<<8);
-    return c;
-}
-#else
-#include <termios.h>
-#include <unistd.h>
-int read_key(void) 
-{
-   char buf = 0;
-   struct termios old = {0};
-   fflush(stdout);
-   if(tcgetattr(0, &old) < 0)
-       perror("tcsetattr()");
-   old.c_lflag &= (~ICANON) & (~ECHO);
-   old.c_cc[VMIN] = 1;
-   old.c_cc[VTIME] = 0;
-   if(tcsetattr(0, TCSANOW, &old) < 0)
-       perror("tcsetattr ICANON");
-   if(read(0, &buf, 1) < 0)
-       perror("read()");
-   old.c_lflag |= ICANON | ECHO;
-   if(tcsetattr(0, TCSADRAIN, &old) < 0)
-       perror("tcsetattr ~ICANON");
-   return buf;
-}
-#endif
-
 using namespace std;
 
 struct ivec2 // our basic 2d point plus a few operations
@@ -85,6 +50,7 @@ ivec2 hero;
 vector<pair<ivec2,int>> enemy_position_and_last_direction;
 
 // function prototypes
+int read_key(void);
 void bit_set(uint8_t& bits, int pos);
 void bit_clear(uint8_t& bits, int pos);
 bool bit_test(uint8_t& bits, int pos);
@@ -102,6 +68,39 @@ void use_dynamite(void);
 void move(int feature_bit, ivec2& from, ivec2 to);
 void win(void);
 void welcome(void);
+
+#ifdef _WIN32
+#include <conio.h>
+int read_key(void)
+{
+    int c = _getch();
+    if (c == 0 || c == 224) // in some cases on windows(?), pressing arrow keys returns two of these values, where the first is 0 or 224.
+        c = _getch() + (c<<8);
+    return c;
+}
+#else
+#include <termios.h>
+#include <unistd.h>
+int read_key(void)
+{
+   char buf = 0;
+   struct termios old = {0};
+   fflush(stdout);
+   if(tcgetattr(0, &old) < 0)
+       perror("tcsetattr()");
+   old.c_lflag &= (~ICANON) & (~ECHO);
+   old.c_cc[VMIN] = 1;
+   old.c_cc[VTIME] = 0;
+   if(tcsetattr(0, TCSANOW, &old) < 0)
+       perror("tcsetattr ICANON");
+   if(read(0, &buf, 1) < 0)
+       perror("read()");
+   old.c_lflag |= ICANON | ECHO;
+   if(tcsetattr(0, TCSADRAIN, &old) < 0)
+       perror("tcsetattr ~ICANON");
+   return buf;
+}
+#endif
 
 void bit_set(uint8_t& bits, int pos) { bits |= 1 << pos; }
 void bit_clear(uint8_t& bits, int pos) { bits &= ~(1UL << pos); }
