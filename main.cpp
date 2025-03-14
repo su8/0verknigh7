@@ -158,9 +158,8 @@ void clearscreen(void) { cout << "\033[2J\033[0;0H"; }
 
 void display(void)
 {
-    static const vector<string> reqColour = {"\033[1;32m@\033[0;0m", "\033[1;31mD\033[0;0m", "\033[1;33m$\033[0;0m", "\033[1;34m>\033[0;0m"};
-    static const char reqChar[] = {'@', 'D', '$', '>'};
-
+    static const vector<string> reqColour = {"\033[1;32m@\033[0;0m", "\033[1;31mD\033[0;0m", "\033[1;33m$\033[0;0m", "\033[1;34m>\033[0;0m", "\033[1;35mY\033[0;0m"};
+    static const char reqChar[] = {'@', 'D', '$', '>', 'Y'};
     clearscreen();
     for (int y = dims.y - 1; y >= 0; --y)
     {
