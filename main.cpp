@@ -170,9 +170,9 @@ void display(void)
             for (int j = 0; j <= HERO; ++j)
                 if (m & (1 << j))
                     c = symbols[j];
-            unsigned short int increment = 0;
+            unsigned short int increment = 0U;
             unsigned short int foundReqChar = 0U;
-            for (auto &key : reqColour) {
+            for (const auto &key : reqColour) {
                 if (reqChar[increment] == c) {
                     cout << key;
                     foundReqChar = 1U;
@@ -180,7 +180,7 @@ void display(void)
                 }
                 increment++;
             }
-           if (foundReqChar == 0)
+           if (foundReqChar == 0U)
                cout << c;
         }
         if      (y == (dims.y - 1)) cout << "  Level:    " << level;
