@@ -10,7 +10,6 @@ jobs:
   build:
 
     runs-on: [ubuntu-latest, windows-latest]
-    compiler: [ latest, g++]
     steps:
     - uses: actions/checkout@v4
     - name: make -j8
