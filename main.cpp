@@ -24,7 +24,6 @@ MA 02110-1301, USA.
 #include <string>
 #include <utility>
 #include <ctime>
-#include <unistd.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -331,12 +330,8 @@ void move(int feature_bit, ivec2& from, ivec2 to)
 }
 
 int main(void) {
-    time_t t = std::time(0);
 #ifdef _WIN32
-      std::srand(t);
-      SetConsoleTitle("0verknigh7");
-#else
-      srandom(static_cast<unsigned int>(t) ^ static_cast<unsigned int>(getpid()));
+    SetConsoleTitle("0verknigh7");
 #endif /*_WIN32 */
     welcome(); // show welcome screen
     setup_keys(); // setup movement, dynamite and restart game keys
@@ -376,8 +371,7 @@ int main(void) {
                 auto p = (e.first + nbo[iDir] + dims)%dims; // wrap around map
                 if (bit_test(mapelem(p), FLOOR)) // if movable target pos, go there
                 {
-                    auto v = mapelem(p);
-                    if (!bit_test(v, ENEMY)) { // don't dissapear ENEMY when colliding 2 or more enemies
+                    if (!bit_test(mapelem(p), ENEMY)) { // don't dissapear ENEMY when colliding 2 or more enemies
                         move(ENEMY, e.first, p);
                         e.second = iDir;
                         moved = true;
