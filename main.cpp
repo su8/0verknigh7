@@ -171,6 +171,7 @@ void clearscreen(unsigned short int clearOnWin) {
     Position.Y = 0;
     SetConsoleCursorPosition(hOut, Position);
 #else
+    static_cast<void>(clearOnWin);
     std::cout << "\033[2J\033[0;0H";
 #endif /*_WIN32 */
 }
