@@ -377,7 +377,7 @@ int main(void) {
                 if (bit_test(mapelem(p), FLOOR)) // if movable target pos, go there
                 {
                     auto v = mapelem(p);
-                    if (!(bit_test(v, ENEMY) && bit_test(v, FLOOR))) { // don't dissapear ENEMY when colliding between 2 enemies
+                    if (!bit_test(v, ENEMY)) { // don't dissapear ENEMY when colliding 2 or more enemies
                         move(ENEMY, e.first, p);
                         e.second = iDir;
                         moved = true;
