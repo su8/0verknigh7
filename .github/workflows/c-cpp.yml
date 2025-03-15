@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-linux:
 
     runs-on: ubuntu-latest
     steps:
@@ -15,7 +15,7 @@ jobs:
     - name: make -j8
       run: make -j8
 
-  build2:
+  build-windows:
 
     runs-on: windows-latest
     steps:

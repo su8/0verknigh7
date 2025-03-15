@@ -133,9 +133,11 @@ void setup_keys(void)
 // a step of the algorithm, given an active, carved cell
 void create_iteration(ivec2 p)
 {
+    std::random_device rd;
+    std::mt19937 g(rd());
     // for each of the 4 directions, in random order
     std::array<int, 4> dir4_index{ 0,1,2,3 };
-    std::random_shuffle(dir4_index.begin(), dir4_index.end());
+    std::shuffle(dir4_index.begin(), dir4_index.end(), g);
     for (auto i : dir4_index)
     {
         auto nb = p + nbo[i] * 2; // get the nb coord
