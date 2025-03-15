@@ -159,8 +159,7 @@ void clearscreen(void) { std::cout << "\033[2J\033[0;0H"; }
 
 void display(void)
 {
-    static const std::vector<std::string> reqColour = {"\033[1;32m@\033[0;0m", "\033[1;31mD\033[0;0m", "\033[1;33m$\033[0;0m", "\033[1;34m>\033[0;0m", "\033[1;35mY\033[0;0m"};
-    static const char reqChar[] = {'@', 'D', '$', '>', 'Y'};
+    static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;33m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"} };
     clearscreen();
     for (int y = dims.y - 1; y >= 0; --y)
     {
@@ -173,9 +172,9 @@ void display(void)
                     c = symbols[j];
             unsigned short int increment = 0U;
             unsigned short int foundReqChar = 0U;
-            for (const auto &key : reqColour) {
-                if (reqChar[increment] == c) {
-                    std::cout << key;
+            for (const auto &[key, val] : reqColour) {
+                if (key == c) {
+                    std::cout << val;
                     foundReqChar = 1U;
                     break;
                 }
