@@ -373,10 +373,13 @@ int main(void) {
                 auto p = (e.first + nbo[iDir] + dims)%dims; // wrap around map
                 if (bit_test(mapelem(p), FLOOR)) // if movable target pos, go there
                 {
-                    move(ENEMY, e.first, p);
-                    e.second = iDir;
-                    moved = true;
-                    break;
+                    auto v = mapelem(p);
+                    if (!(bit_test(v, ENEMY) && bit_test(v, FLOOR))) { // don't dissapear ENEMY when colliding between 2 enemies
+                        move(ENEMY, e.first, p);
+                        e.second = iDir;
+                        moved = true;
+                        break;
+                    }
                 }
             }
             if (!moved) // failed to move? Can surely go opposite of last position
