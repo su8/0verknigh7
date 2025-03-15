@@ -24,6 +24,7 @@ MA 02110-1301, USA.
 #include <string>
 #include <utility>
 #include <ctime>
+#include <unistd.h>
 
 struct ivec2 // our basic 2d point plus a few operations
 {
@@ -63,7 +64,7 @@ void create_iteration(ivec2 p);
 void place_feature(int feature_bit, int num);
 void clearscreen(void);
 void display(void);
-void create_level(int seed);
+void create_level(void);
 void startgame(void);
 void use_dynamite(void);
 void move(int feature_bit, ivec2& from, ivec2 to);
@@ -189,10 +190,9 @@ void display(void)
     }
 }
 
-void create_level(int seed)
+void create_level(void)
 {
     ++level;
-    srand(seed); // seed the randomiser
     map.fill(0); // clear the map
     ivec2 p = { (std::rand() % (dims.x-1)) | 1, (std::rand() % (dims.y-1)) | 1 }; // pick a point (odd coords) and carve it
     mapelem(p) = 1;
@@ -230,7 +230,7 @@ void startgame(void)
     level = 0;
     steps = 0;
     dynamite = 3;
-    create_level(std::time(0));
+    create_level();
 }
 
 // dynamite clears neighbour walls and enemies
@@ -305,10 +305,17 @@ void move(int feature_bit, ivec2& from, ivec2 to)
     else if (bit_test(v, HERO) && bit_test(v, ORB))
         win();
     else if (bit_test(v, HERO) && bit_test(v, EXIT))
-        create_level(std::time(0));
+        create_level();
 }
 
 int main(void) {
+    time_t t = std::time(0);
+#ifdef _WIN32
+      std::srand(t);
+#else
+      srandom(static_cast<unsigned int>(t) ^ static_cast<unsigned int>(getpid()));
+#endif /*_WIN32 */
+
     welcome(); // show welcome screen
     setup_keys(); // setup movement, dynamite and restart game keys
     startgame(); 
