@@ -26,6 +26,7 @@ MA 02110-1301, USA.
 #include <ctime>
 
 #ifdef _WIN32
+#include <conio.h>
 #include <windows.h>
 #endif /* _WIN32 */
 
@@ -75,7 +76,6 @@ void win(void);
 void welcome(void);
 
 #ifdef _WIN32
-#include <conio.h>
 int read_key(void)
 {
     int c = _getch();
