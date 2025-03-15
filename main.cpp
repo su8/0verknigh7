@@ -21,6 +21,9 @@ MA 02110-1301, USA.
 #include <algorithm>
 #include <array>
 #include <vector>
+#include <string>
+#include <utility>
+#include <ctime>
 
 struct ivec2 // our basic 2d point plus a few operations
 {
@@ -179,7 +182,7 @@ void display(void)
                 increment++;
             }
             if (foundReqChar == 0U)
-            std::cout << c;
+                std::cout << c;
         }
         if      (y == (dims.y - 1)) std::cout << "  Level:    " << level;
         else if (y == (dims.y - 2)) std::cout << "  Treasure: " << treasure;
@@ -230,7 +233,7 @@ void startgame(void)
     level = 0;
     steps = 0;
     dynamite = 3;
-    create_level(time(NULL));
+    create_level(std::time(0));
 }
 
 // dynamite clears neighbour walls and enemies
@@ -305,7 +308,7 @@ void move(int feature_bit, ivec2& from, ivec2 to)
     else if (bit_test(v, HERO) && bit_test(v, ORB))
         win();
     else if (bit_test(v, HERO) && bit_test(v, EXIT))
-        create_level(time(NULL));
+        create_level(std::time(0));
 }
 
 int main(void) {
