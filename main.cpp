@@ -170,7 +170,6 @@ void display(void)
             for (int j = 0; j <= HERO; ++j)
                 if (m & (1 << j))
                     c = symbols[j];
-            unsigned short int increment = 0U;
             unsigned short int foundReqChar = 0U;
             for (const auto &[key, val] : reqColour) {
                 if (key == c) {
@@ -178,7 +177,6 @@ void display(void)
                     foundReqChar = 1U;
                     break;
                 }
-                increment++;
             }
             if (foundReqChar == 0U)
                 std::cout << c;
