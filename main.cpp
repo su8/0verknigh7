@@ -26,6 +26,10 @@ MA 02110-1301, USA.
 #include <ctime>
 #include <unistd.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif /* _WIN32 */
+
 struct ivec2 // our basic 2d point plus a few operations
 {
     int x = 0;
@@ -62,7 +66,7 @@ uint8_t &mapelem(ivec2 p);
 void setup_keys(void);
 void create_iteration(ivec2 p);
 void place_feature(int feature_bit, int num);
-void clearscreen(void);
+void clearscreen(unsigned short int clearOnWin);
 void display(void);
 void create_level(void);
 void startgame(void);
@@ -156,12 +160,23 @@ void place_feature(int feature_bit, int num)
             }
 }
 
-void clearscreen(void) { std::cout << "\033[2J\033[0;0H"; }
+void clearscreen(unsigned short int clearOnWin) {
+#ifdef _WIN32
+    if (clearOnWin == 1U) std::cout << "\033[2J\033[0;0H";
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD Position;
+    Position.X = 0;
+    Position.Y = 0;
+    SetConsoleCursorPosition(hOut, Position);
+#else
+    std::cout << "\033[2J\033[0;0H";
+#endif /*_WIN32 */
+}
 
 void display(void)
 {
     static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;33m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"} };
-    clearscreen();
+    clearscreen(0U);
     for (int y = dims.y - 1; y >= 0; --y)
     {
         for (int x = 0; x < dims.x; ++x)
@@ -226,6 +241,10 @@ void create_level(void)
 
 void startgame(void)
 {
+#ifdef _WIN32
+    std::cout << "\033[2J\033[0;0H";
+#endif /* _WIN32 */
+
     treasure = 0;
     level = 0;
     steps = 0;
@@ -251,7 +270,7 @@ void use_dynamite(void)
 
 void win(void) // ansi shadow font from TAAG
 {
-  clearscreen();
+  clearscreen(1U);
   std::cout<<"\n\n"<< R"(
 ██╗   ██╗ ██████╗ ██╗   ██╗    ██╗    ██╗ ██████╗ ███╗   ██╗
 ╚██╗ ██╔╝██╔═══██╗██║   ██║    ██║    ██║██╔═══██╗████╗  ██║
