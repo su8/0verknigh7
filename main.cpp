@@ -331,10 +331,10 @@ int main(void) {
     time_t t = std::time(0);
 #ifdef _WIN32
       std::srand(t);
+      SetConsoleTitle("0verknigh7");
 #else
       srandom(static_cast<unsigned int>(t) ^ static_cast<unsigned int>(getpid()));
 #endif /*_WIN32 */
-
     welcome(); // show welcome screen
     setup_keys(); // setup movement, dynamite and restart game keys
     startgame(); 
