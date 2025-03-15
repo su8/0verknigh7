@@ -151,7 +151,7 @@ void create_iteration(ivec2 p)
 void place_feature(int feature_bit, int num)
 {
     int floors_traversed = 0;
-    int place_at_multiples_of = 50 + (rand()%100);
+    int place_at_multiples_of = 50 + (std::rand()%100);
     while(num > 0)
         for(auto& m : map)
             if(m == 1 && (++floors_traversed % place_at_multiples_of) == 0)
@@ -232,7 +232,7 @@ void create_level(void)
     int to_remove = 20;
     while(to_remove > 0)
     {
-        auto& m = mapelem(ivec2{rand(),rand()}%dims);
+        auto& m = mapelem(ivec2{std::rand(),std::rand()}%dims);
         if (m == 0)
         {
             m = 1;
