@@ -72,8 +72,8 @@ void create_level(void);
 void startgame(void);
 void use_dynamite(void);
 void move(int feature_bit, ivec2& from, ivec2 to);
-void playEnemy(void);
-void playHero(void);
+void moveEnemy(void);
+void moveHero(void);
 void win(void);
 void welcome(void);
 
@@ -179,7 +179,7 @@ void clearscreen(unsigned short int clearOnWin) {
 
 void display(void)
 {
-    static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;33m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"} };
+    static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;33m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"}, {'#', "\033[1;33m#\033[0;0m"} };
     clearscreen(0U);
     for (int y = dims.y - 1; y >= 0; --y)
     {
@@ -271,53 +271,6 @@ void use_dynamite(void)
   }
 }
 
-void playEnemy(void)
-{
-    for (auto& e : enemy_position_and_last_direction)
-    {
-        int i0 = std::rand() % 4; // pick random start dir
-        bool moved = false;
-        for (int i = 0; i<4;++i) // try all dirs, starting at the random one
-        {
-            int iDirOpposite = (i0 + i+2) % 4;
-            if (iDirOpposite == e.second) // don't go opposite of last direction
-                continue;
-            int iDir = (i0 + i) % 4;
-            auto p = (e.first + nbo[iDir] + dims)%dims; // wrap around map
-            if (bit_test(mapelem(p), FLOOR)) // if movable target pos, go there
-            {
-                if (!bit_test(mapelem(p), ENEMY)) // don't swallow ENEMY when colliding 2 or more enemies
-                {
-                    move(ENEMY, e.first, p);
-                    e.second = iDir;
-                    moved = true;
-                    break;
-                }
-            }
-        }
-        if (!moved) // failed to move? Can surely go opposite of last position
-        {
-            int iDirOpposite = (e.second + 2) % 4;
-            move(ENEMY, e.first, e.first + nbo[iDirOpposite]);
-            e.second = iDirOpposite;
-        }
-    }
-}
-
-void playHero(void)
-{
-    ivec2 dir; // defaults to 0
-    for(int i=0;i<4;++i) // set direction if correct key pressed
-        if (ch == keys[i])
-          dir = nbo[i];
-    auto q = (hero + dir + dims)%dims; // make new point
-    if (mapelem(q) > 0) // if it's not a wall
-    {
-        move(HERO, hero, q);
-        ++steps;
-    }
-}
-
 void win(void) // ansi shadow font from TAAG
 {
   clearscreen(1U);
@@ -377,6 +330,53 @@ void move(int feature_bit, ivec2& from, ivec2 to)
         create_level();
 }
 
+void moveEnemy(void)
+{
+    for (auto& e : enemy_position_and_last_direction)
+    {
+        int i0 = std::rand() % 4; // pick random start dir
+        bool moved = false;
+        for (int i = 0; i<4;++i) // try all dirs, starting at the random one
+        {
+            int iDirOpposite = (i0 + i+2) % 4;
+            if (iDirOpposite == e.second) // don't go opposite of last direction
+                continue;
+            int iDir = (i0 + i) % 4;
+            auto p = (e.first + nbo[iDir] + dims)%dims; // wrap around map
+            if (bit_test(mapelem(p), FLOOR)) // if movable target pos, go there
+            {
+                if (!bit_test(mapelem(p), ENEMY)) // don't swallow ENEMY when colliding 2 or more enemies
+                {
+                    move(ENEMY, e.first, p);
+                    e.second = iDir;
+                    moved = true;
+                    break;
+                }
+            }
+        }
+        if (!moved) // failed to move? Can surely go opposite of last position
+        {
+            int iDirOpposite = (e.second + 2) % 4;
+            move(ENEMY, e.first, e.first + nbo[iDirOpposite]);
+            e.second = iDirOpposite;
+        }
+    }
+}
+
+void moveHero(void)
+{
+    ivec2 dir; // defaults to 0
+    for(int i=0;i<4;++i) // set direction if correct key pressed
+        if (ch == keys[i])
+            dir = nbo[i];
+    auto q = (hero + dir + dims)%dims; // make new point
+    if (mapelem(q) > 0) // if it's not a wall
+    {
+        move(HERO, hero, q);
+        ++steps;
+    }
+}
+
 int main(void) {
 #ifdef _WIN32
     SetConsoleTitle("0verknigh7");
@@ -393,9 +393,9 @@ int main(void) {
         if(ch == keys[4] && dynamite > 0) // dynamite key pressed?
             use_dynamite();
         else // might be a movement key then
-            playHero(); // Play Hero movement
+            moveHero(); // Move Hero
 
-        playEnemy(); // Play movement of all enemies
+        moveEnemy(); // Move all enemies
     }
     return EXIT_SUCCESS;
 }
