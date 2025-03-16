@@ -53,6 +53,7 @@ int steps = 0;
 int dynamite = 0;
 ivec2 hero;
 std::vector<std::pair<ivec2,int>> enemy_position_and_last_direction;
+int ch;
 
 // function prototypes
 int read_key(void);
@@ -72,6 +73,7 @@ void startgame(void);
 void use_dynamite(void);
 void move(int feature_bit, ivec2& from, ivec2 to);
 void playEnemy(void);
+void playHero(void);
 void win(void);
 void welcome(void);
 
@@ -220,7 +222,7 @@ void create_level(void)
     place_feature(EXIT, 1); 
     int orbchance = 10*(level-15);
     if( (std::rand()%100) < orbchance)
-      place_feature(ORB, 1); 
+        place_feature(ORB, 1);
     enemy_position_and_last_direction.clear();
     hero = p;
     for (p.y = 0; p.y < dims.y; ++p.y)
@@ -263,7 +265,7 @@ void use_dynamite(void)
     auto p = (hero + nbo[i] + dims)%dims;
     auto& m = mapelem(p);
     if(bit_test(m, ENEMY))
-      vec.erase(std::remove_if(vec.begin(), vec.end(), [p](auto x){return x.first == p;}), vec.end());
+        vec.erase(std::remove_if(vec.begin(), vec.end(), [p](auto x){return x.first == p;}), vec.end());
     bit_clear(m, ENEMY);
     bit_set(m, FLOOR);
   }
@@ -299,6 +301,20 @@ void playEnemy(void)
             move(ENEMY, e.first, e.first + nbo[iDirOpposite]);
             e.second = iDirOpposite;
         }
+    }
+}
+
+void playHero(void)
+{
+    ivec2 dir; // defaults to 0
+    for(int i=0;i<4;++i) // set direction if correct key pressed
+        if (ch == keys[i])
+          dir = nbo[i];
+    auto q = (hero + dir + dims)%dims; // make new point
+    if (mapelem(q) > 0) // if it's not a wall
+    {
+        move(HERO, hero, q);
+        ++steps;
     }
 }
 
@@ -371,26 +387,15 @@ int main(void) {
     while (true) // main loop
     {
         display();
-        int c = read_key();
-        if (c == keys[5]) // restart key pressed?
-          startgame();
-        if(c == keys[4] && dynamite > 0) // dynamite key pressed?
-          use_dynamite();
+        ch = read_key();
+        if (ch == keys[5]) // restart key pressed?
+            startgame();
+        if(ch == keys[4] && dynamite > 0) // dynamite key pressed?
+            use_dynamite();
         else // might be a movement key then
-        {
-          ivec2 dir; // defaults to 0
-          for(int i=0;i<4;++i) // set direction if correct key pressed
-            if (c == keys[i])
-                dir = nbo[i];
-          auto q = (hero + dir + dims)%dims; // make new point
-          if (mapelem(q) > 0) // if it's not a wall
-          {
-              move(HERO, hero, q);
-              ++steps;
-          }
-        } 
-        // Play all enemies
-        playEnemy();
+            playHero(); // Play Hero movement
+
+        playEnemy(); // Play movement of all enemies
     }
     return EXIT_SUCCESS;
 }
