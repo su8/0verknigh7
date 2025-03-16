@@ -9,7 +9,12 @@ Small Rogue c++ game that I found on reddit - https://www.reddit.com/r/roguelike
 - [x] Permadeath
 - [x] Infinite procedurally generated dungeon
 - [x] Victory condition: retrieve the orb! Legend says it lies somewhere between levels 16-25
-- [x] What can you do in the game?
+- [x] Added colour
+- [x] Fixed a bug when 2 enemies meet each other as they swallow the other one
+- [x] Windows OS cmd terminal is not flickering anymore
+- [x] Added a .bat script for the Windows users, so they can start the game in cmd terminal
+- [x] Removed `std` globally
+- [x] Uses better randomization mechanism for the maps
 - [x] Explore! Walking to a wall or pressing random keys skips a turn
 - [x] Collect treasure: just walk over it
 - [x] Avoid the rotating disc-blades: They move always towards a random direction except the one they came from, and they bounce off dead-ends
