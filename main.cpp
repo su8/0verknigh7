@@ -23,7 +23,6 @@ MA 02110-1301, USA.
 #include <vector>
 #include <string>
 #include <utility>
-#include <ctime>
 
 #ifdef _WIN32
 #include <conio.h>
@@ -72,6 +71,7 @@ void create_level(void);
 void startgame(void);
 void use_dynamite(void);
 void move(int feature_bit, ivec2& from, ivec2 to);
+void playEnemy(void);
 void win(void);
 void welcome(void);
 
@@ -246,7 +246,6 @@ void startgame(void)
 #ifdef _WIN32
     std::cout << "\033[2J\033[0;0H";
 #endif /* _WIN32 */
-
     treasure = 0;
     level = 0;
     steps = 0;
@@ -270,6 +269,39 @@ void use_dynamite(void)
   }
 }
 
+void playEnemy(void)
+{
+    for (auto& e : enemy_position_and_last_direction)
+    {
+        int i0 = std::rand() % 4; // pick random start dir
+        bool moved = false;
+        for (int i = 0; i<4;++i) // try all dirs, starting at the random one
+        {
+            int iDirOpposite = (i0 + i+2) % 4;
+            if (iDirOpposite == e.second) // don't go opposite of last direction
+                continue;
+            int iDir = (i0 + i) % 4;
+            auto p = (e.first + nbo[iDir] + dims)%dims; // wrap around map
+            if (bit_test(mapelem(p), FLOOR)) // if movable target pos, go there
+            {
+                if (!bit_test(mapelem(p), ENEMY)) // don't swallow ENEMY when colliding 2 or more enemies
+                {
+                    move(ENEMY, e.first, p);
+                    e.second = iDir;
+                    moved = true;
+                    break;
+                }
+            }
+        }
+        if (!moved) // failed to move? Can surely go opposite of last position
+        {
+            int iDirOpposite = (e.second + 2) % 4;
+            move(ENEMY, e.first, e.first + nbo[iDirOpposite]);
+            e.second = iDirOpposite;
+        }
+    }
+}
+
 void win(void) // ansi shadow font from TAAG
 {
   clearscreen(1U);
@@ -281,14 +313,14 @@ void win(void) // ansi shadow font from TAAG
    ██║   ╚██████╔╝╚██████╔╝    ╚███╔███╔╝╚██████╔╝██║ ╚████║
    ╚═╝    ╚═════╝  ╚═════╝      ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═══╝
 )";
-std::cout << "\n... as the mighty orb is yours to wield!\n\n";
-constexpr char tabs[] = "\t\t\t\t\t";
-std::cout << tabs<<"Treasure    : "<<treasure<<'\n';
-std::cout << tabs<<"Steps       : "<<steps<<"\n\n";
-std::cout << tabs<<"Dynamite    : "<<dynamite<<"\n\n";
-std::cout << tabs<<"Total score : "<< int((treasure + 10*dynamite)*1000/(float)(steps+1))<<'\n';
-getchar();
-startgame();
+    std::cout << "\n... as the mighty orb is yours to wield!\n\n";
+    constexpr char tabs[] = "\t\t\t\t\t";
+    std::cout << tabs<<"Treasure    : "<<treasure<<'\n';
+    std::cout << tabs<<"Steps       : "<<steps<<"\n\n";
+    std::cout << tabs<<"Dynamite    : "<<dynamite<<"\n\n";
+    std::cout << tabs<<"Total score : "<< int((treasure + 10*dynamite)*1000/(float)(steps+1))<<'\n';
+    getchar();
+    startgame();
 }
 
 void welcome(void) // ansi shadow font from TAAG
@@ -358,34 +390,7 @@ int main(void) {
           }
         } 
         // Play all enemies
-        for (auto& e : enemy_position_and_last_direction)
-        {
-            int i0 = std::rand() % 4; // pick random start dir
-            bool moved = false;
-            for (int i = 0; i<4;++i) // try all dirs, starting at the random one
-            {
-                int iDirOpposite = (i0 + i+2) % 4;
-                if (iDirOpposite == e.second) // don't go opposite of last direction
-                    continue; 
-                int iDir = (i0 + i) % 4;
-                auto p = (e.first + nbo[iDir] + dims)%dims; // wrap around map
-                if (bit_test(mapelem(p), FLOOR)) // if movable target pos, go there
-                {
-                    if (!bit_test(mapelem(p), ENEMY)) { // don't dissapear ENEMY when colliding 2 or more enemies
-                        move(ENEMY, e.first, p);
-                        e.second = iDir;
-                        moved = true;
-                        break;
-                    }
-                }
-            }
-            if (!moved) // failed to move? Can surely go opposite of last position
-            {
-                int iDirOpposite = (e.second + 2) % 4;
-                move(ENEMY, e.first, e.first + nbo[iDirOpposite]);
-                e.second = iDirOpposite;
-            }
-        }
+        playEnemy();
     }
     return EXIT_SUCCESS;
 }
