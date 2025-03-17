@@ -56,29 +56,29 @@ std::vector<std::pair<ivec2,int>> enemy_position_and_last_direction;
 int ch;
 
 // function prototypes
-int read_key(void);
-void bit_set(uint8_t& bits, int pos);
-void bit_clear(uint8_t& bits, int pos);
-bool bit_test(uint8_t& bits, int pos);
-bool oob(ivec2 p);
-bool oobb(ivec2 p);
-uint8_t &mapelem(ivec2 p);
-void setup_keys(void);
-void create_iteration(ivec2 p);
-void place_feature(int feature_bit, int num);
-void clearscreen(unsigned short int clearOnWin);
-void display(void);
-void create_level(void);
-void startgame(void);
-void use_dynamite(void);
-void move(int feature_bit, ivec2& from, ivec2 to);
-void moveEnemy(void);
-void moveHero(void);
-void win(void);
-void welcome(void);
+static int read_key(void);
+static void bit_set(uint8_t& bits, int pos);
+static void bit_clear(uint8_t& bits, int pos);
+static bool bit_test(uint8_t& bits, int pos);
+static bool oob(ivec2 p);
+static bool oobb(ivec2 p);
+static uint8_t &mapelem(ivec2 p);
+static void setup_keys(void);
+static void create_iteration(ivec2 p);
+static void place_feature(int feature_bit, int num);
+static void clearscreen(unsigned short int clearOnWin);
+static void display(void);
+static void create_level(void);
+static void startgame(void);
+static void use_dynamite(void);
+static void move(int feature_bit, ivec2& from, ivec2 to);
+static inline void moveEnemy(void);
+static inline void moveHero(void);
+static void win(void);
+static void welcome(void);
 
 #ifdef _WIN32
-int read_key(void)
+static int read_key(void)
 {
     int c = _getch();
     if (c == 0 || c == 224) // in some cases on windows(?), pressing arrow keys returns two of these values, where the first is 0 or 224.
@@ -88,7 +88,7 @@ int read_key(void)
 #else
 #include <termios.h>
 #include <unistd.h>
-int read_key(void)
+static int read_key(void)
 {
    char buf = 0;
    struct termios old = {0};
@@ -109,18 +109,18 @@ int read_key(void)
 }
 #endif /* _WIN32 */
 
-void bit_set(uint8_t& bits, int pos) { bits |= 1 << pos; }
-void bit_clear(uint8_t& bits, int pos) { bits &= ~(1UL << pos); }
-bool bit_test(uint8_t& bits, int pos) { return bits & (1 << pos); }
+static void bit_set(uint8_t& bits, int pos) { bits |= 1 << pos; }
+static void bit_clear(uint8_t& bits, int pos) { bits &= ~(1UL << pos); }
+static bool bit_test(uint8_t& bits, int pos) { return bits & (1 << pos); }
 
 // out of bounds
-bool oob(ivec2 p) { return p.x < 0 || p.y < 0 || p.x >= dims.x || p.y >= dims.y;  }
+static bool oob(ivec2 p) { return p.x < 0 || p.y < 0 || p.x >= dims.x || p.y >= dims.y;  }
 // out of bounds or on border
-bool oobb(ivec2 p) { return p.x <= 0 || p.y <= 0 || p.x >= (dims.x-1) || p.y >= (dims.y-1); }
+static bool oobb(ivec2 p) { return p.x <= 0 || p.y <= 0 || p.x >= (dims.x-1) || p.y >= (dims.y-1); }
 // get the map element at position
-uint8_t& mapelem(ivec2 p) { return map[p.x + p.y * dims.x]; }
+static uint8_t& mapelem(ivec2 p) { return map[p.x + p.y * dims.x]; }
 
-void setup_keys(void)
+static void setup_keys(void)
 {
     int i = 0;
     std::cout<<"Press key for ";
@@ -132,7 +132,7 @@ void setup_keys(void)
 }
 
 // a step of the algorithm, given an active, carved cell
-void create_iteration(ivec2 p)
+static void create_iteration(ivec2 p)
 {
     std::random_device rd;
     std::mt19937 g(rd());
@@ -150,7 +150,7 @@ void create_iteration(ivec2 p)
     }
 }
 
-void place_feature(int feature_bit, int num)
+static void place_feature(int feature_bit, int num)
 {
     int floors_traversed = 0;
     int place_at_multiples_of = 50 + (std::rand()%100);
@@ -163,7 +163,7 @@ void place_feature(int feature_bit, int num)
             }
 }
 
-void clearscreen(unsigned short int clearOnWin) {
+static void clearscreen(unsigned short int clearOnWin) {
 #ifdef _WIN32
     if (clearOnWin == 1U) std::cout << "\033[2J\033[0;0H";
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -177,7 +177,7 @@ void clearscreen(unsigned short int clearOnWin) {
 #endif /*_WIN32 */
 }
 
-void display(void)
+static void display(void)
 {
     static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;36m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"}, {'#', "\033[1;33m#\033[0;0m"} };
     clearscreen(0U);
@@ -209,7 +209,7 @@ void display(void)
     }
 }
 
-void create_level(void)
+static void create_level(void)
 {
     ++level;
     map.fill(0); // clear the map
@@ -243,7 +243,7 @@ void create_level(void)
     }
 }
 
-void startgame(void)
+static void startgame(void)
 {
 #ifdef _WIN32
     std::cout << "\033[2J\033[0;0H";
@@ -256,7 +256,7 @@ void startgame(void)
 }
 
 // dynamite clears neighbour walls and enemies
-void use_dynamite(void)
+static void use_dynamite(void)
 {
   --dynamite;
   auto& vec = enemy_position_and_last_direction;
@@ -271,7 +271,7 @@ void use_dynamite(void)
   }
 }
 
-void win(void) // ansi shadow font from TAAG
+static void win(void) // ansi shadow font from TAAG
 {
   clearscreen(1U);
   std::cout<<"\n\n"<< R"(
@@ -292,7 +292,7 @@ void win(void) // ansi shadow font from TAAG
     startgame();
 }
 
-void welcome(void) // ansi shadow font from TAAG
+static void welcome(void) // ansi shadow font from TAAG
 {
   std::cout << "\n\n"<<R"(
  ██████╗ ██╗   ██╗███████╗███████╗████████╗    ███████╗ ██████╗ ██████╗     
@@ -311,7 +311,7 @@ void welcome(void) // ansi shadow font from TAAG
 )" <<"\n\n\n\n\t\t\tWelcome brave adventurer, and may fate shine upon you!\n\n";
 }
 
-void move(int feature_bit, ivec2& from, ivec2 to)
+static void move(int feature_bit, ivec2& from, ivec2 to)
 {
     bit_clear( mapelem(from), feature_bit); // clear
     bit_set( mapelem(to), feature_bit); // set
@@ -330,7 +330,7 @@ void move(int feature_bit, ivec2& from, ivec2 to)
         create_level();
 }
 
-void moveEnemy(void)
+static inline void moveEnemy(void)
 {
     for (auto& e : enemy_position_and_last_direction)
     {
@@ -363,7 +363,7 @@ void moveEnemy(void)
     }
 }
 
-void moveHero(void)
+static inline void moveHero(void)
 {
     ivec2 dir; // defaults to 0
     for(int i=0;i<4;++i) // set direction if correct key pressed
