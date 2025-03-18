@@ -23,7 +23,7 @@ Small Roguelike c++ game that I found on reddit - https://www.reddit.com/r/rogue
 
 ### What my fork has added
 
-- [x] Collect per level additional `life(s)`
+- [x] Collect per level additional `life(s)` and `shield(s)`
 - [x] In-game colour
 - [x] Fixed a bug when 2 enemies meet each other as they swallow the other one
 - [x] Windows OS cmd terminal is not flickering anymore
