@@ -39,9 +39,9 @@ struct ivec2 // our basic 2d point plus a few operations
     bool operator ==(ivec2 q) const {return x==q.x && y==q.y;}
 };
 
-enum {FLOOR =0, EXIT, TREASURE, ORB, ENEMY, HERO}; // cell flags, in display order
+enum {FLOOR =0, EXIT, TREASURE, ORB, ENEMY, LIFE, HERO}; // cell flags, in display order
 constexpr std::array<ivec2, 4> nbo{ivec2{1,0},{0,1},{-1,0},{0,-1}}; // direction offsets
-constexpr char symbols[] = ".>$YD@"; // symbols for the bit defines
+constexpr char symbols[] = ".>$YDL@"; // symbols for the bit defines
 constexpr ivec2 dims{ 33,21 };       // map dimensions
 
 /// Game state
@@ -51,6 +51,7 @@ int treasure = 0; // collected treasure
 int level = 0;
 int steps = 0;
 int dynamite = 0;
+int life = 1;
 ivec2 hero;
 std::vector<std::pair<ivec2,int>> enemy_position_and_last_direction;
 int ch;
@@ -60,7 +61,7 @@ static int read_key(void);
 static void bit_set(uint8_t& bits, int pos);
 static void bit_clear(uint8_t& bits, int pos);
 static bool bit_test(uint8_t& bits, int pos);
-static bool oob(ivec2 p);
+//static bool oob(ivec2 p);
 static bool oobb(ivec2 p);
 static uint8_t &mapelem(ivec2 p);
 static void setup_keys(void);
@@ -114,7 +115,7 @@ static void bit_clear(uint8_t& bits, int pos) { bits &= ~(1UL << pos); }
 static bool bit_test(uint8_t& bits, int pos) { return bits & (1 << pos); }
 
 // out of bounds
-static bool oob(ivec2 p) { return p.x < 0 || p.y < 0 || p.x >= dims.x || p.y >= dims.y;  }
+//static bool oob(ivec2 p) { return p.x < 0 || p.y < 0 || p.x >= dims.x || p.y >= dims.y;  }
 // out of bounds or on border
 static bool oobb(ivec2 p) { return p.x <= 0 || p.y <= 0 || p.x >= (dims.x-1) || p.y >= (dims.y-1); }
 // get the map element at position
@@ -179,7 +180,7 @@ static void clearscreen(unsigned short int clearOnWin) {
 
 static void display(void)
 {
-    static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;36m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"}, {'#', "\033[1;33m#\033[0;0m"} };
+    static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;36m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"}, {'#', "\033[1;33m#\033[0;0m"}, {'L', "\033[1;36mL\033[0;0m"} };
     clearscreen(0U);
     for (int y = dims.y - 1; y >= 0; --y)
     {
@@ -205,6 +206,7 @@ static void display(void)
         else if (y == (dims.y - 2)) std::cout << "  Treasure: " << treasure;
         else if (y == (dims.y - 3)) std::cout << "  Dynamite: " << dynamite;
         else if (y == (dims.y - 4)) std::cout << "  Steps:    " << steps;
+        else if (y == (dims.y - 5)) std::cout << "  Life(s):  " << life;
         std::cout << '\n';
     }
 }
@@ -220,6 +222,7 @@ static void create_level(void)
     place_feature(TREASURE, 10);
     place_feature(ENEMY, 4+level); 
     place_feature(EXIT, 1); 
+    place_feature(LIFE, 1);
     int orbchance = 10*(level-15);
     if( (std::rand()%100) < orbchance)
         place_feature(ORB, 1);
@@ -252,6 +255,7 @@ static void startgame(void)
     level = 0;
     steps = 0;
     dynamite = 3;
+    life = 1;
     create_level();
 }
 
@@ -271,7 +275,7 @@ static void use_dynamite(void)
   }
 }
 
-static void win(void) // ansi shadow font from TAAG
+static inline void win(void) // ansi shadow font from TAAG
 {
   clearscreen(1U);
   std::cout<<"\n\n"<< R"(
@@ -318,11 +322,21 @@ static void move(int feature_bit, ivec2& from, ivec2 to)
     from = to;
     auto v = mapelem(to);
     if (bit_test(v, HERO) && bit_test(v, ENEMY))
-        startgame();
+    {
+        if (life == 1)
+            startgame();
+        else
+            --life;
+    }
     else if (bit_test(v, HERO) && bit_test(v, TREASURE))
     {
         ++treasure;
         bit_clear(mapelem(to), TREASURE);
+    }
+    else if (bit_test(v, HERO) && bit_test(v, LIFE))
+    {
+        ++life;
+        bit_clear(mapelem(to), LIFE);
     }
     else if (bit_test(v, HERO) && bit_test(v, ORB))
         win();
