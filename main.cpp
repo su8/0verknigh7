@@ -323,10 +323,9 @@ static void move(int feature_bit, ivec2& from, ivec2 to)
     auto v = mapelem(to);
     if (bit_test(v, HERO) && bit_test(v, ENEMY))
     {
-        if (life == 1)
+        --life;
+        if (life == 0)
             startgame();
-        else
-            --life;
     }
     else if (bit_test(v, HERO) && bit_test(v, TREASURE))
     {
