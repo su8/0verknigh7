@@ -418,9 +418,7 @@ int main(void) {
         if (ch == keys[4] && dynamite > 0) // dynamite key pressed?
             useDynamiteOrShield(1);
         if (ch == keys[5] && shield > 0)
-        {
             useDynamiteOrShield(0);
-        }
         else // might be a movement key then
             moveHero(); // Move Hero
 
