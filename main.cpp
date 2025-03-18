@@ -41,7 +41,7 @@ struct ivec2 // our basic 2d point plus a few operations
 
 enum {FLOOR =0, EXIT, TREASURE, ORB, ENEMY, LIFE, SHIELD, HERO}; // cell flags, in display order
 constexpr std::array<ivec2, 4> nbo{ivec2{1,0},{0,1},{-1,0},{0,-1}}; // direction offsets
-constexpr char symbols[] = ".>$YDLS@"; // symbols for the bit defines
+constexpr char symbols[] = ".>$YDLH@"; // symbols for the bit defines
 constexpr ivec2 dims{ 33,21 };       // map dimensions
 
 /// Game state
@@ -181,7 +181,7 @@ static void clearscreen(unsigned short int clearOnWin) {
 
 static void display(void)
 {
-    static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;36m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"}, {'#', "\033[1;33m#\033[0;0m"}, {'L', "\033[1;36mL\033[0;0m"}, {'S', "\033[1;36mS\033[0;0m"} };
+    static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;36m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"}, {'#', "\033[1;33m#\033[0;0m"}, {'L', "\033[1;36mL\033[0;0m"}, {'H', "\033[1;36mH\033[0;0m"} };
     clearscreen(0U);
     for (int y = dims.y - 1; y >= 0; --y)
     {
@@ -266,10 +266,7 @@ static void startgame(void)
 // dynamite clears neighbour walls and enemies
 static void useDynamiteOrShield(int useDynamite)
 {
-    if (useDynamite == 1)
-        --dynamite;
-    else
-        --shield;
+    (useDynamite == 1) ? --dynamite : --shield;
     auto& vec = enemy_position_and_last_direction;
     for(int i=0;i<4;++i)
     {
