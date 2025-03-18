@@ -39,19 +39,20 @@ struct ivec2 // our basic 2d point plus a few operations
     bool operator ==(ivec2 q) const {return x==q.x && y==q.y;}
 };
 
-enum {FLOOR =0, EXIT, TREASURE, ORB, ENEMY, LIFE, HERO}; // cell flags, in display order
+enum {FLOOR =0, EXIT, TREASURE, ORB, ENEMY, LIFE, SHIELD, HERO}; // cell flags, in display order
 constexpr std::array<ivec2, 4> nbo{ivec2{1,0},{0,1},{-1,0},{0,-1}}; // direction offsets
-constexpr char symbols[] = ".>$YDL@"; // symbols for the bit defines
+constexpr char symbols[] = ".>$YDLS@"; // symbols for the bit defines
 constexpr ivec2 dims{ 33,21 };       // map dimensions
 
 /// Game state
-int keys[6];
+int keys[7];
 std::array<uint8_t, dims.x* dims.y> map;
 int treasure = 0; // collected treasure
 int level = 0;
 int steps = 0;
 int dynamite = 0;
 int life = 1;
+int shield = 0;
 ivec2 hero;
 std::vector<std::pair<ivec2,int>> enemy_position_and_last_direction;
 int ch;
@@ -71,7 +72,7 @@ static void clearscreen(unsigned short int clearOnWin);
 static void display(void);
 static void create_level(void);
 static void startgame(void);
-static void use_dynamite(void);
+static void useDynamiteOrShield(int useDynamite);
 static void move(int feature_bit, ivec2& from, ivec2 to);
 static inline void moveEnemy(void);
 static inline void moveHero(void);
@@ -125,7 +126,7 @@ static void setup_keys(void)
 {
     int i = 0;
     std::cout<<"Press key for ";
-    for (auto text : { "RIGHT",", UP",", LEFT",", DOWN",", DYNAMITE", " and RESTART" })
+    for (auto text : { "RIGHT",", UP",", LEFT",", DOWN",", DYNAMITE", ", SHIELD", " and RESTART" })
     {
         std::cout<<text;
         keys[i++] = read_key();
@@ -180,7 +181,7 @@ static void clearscreen(unsigned short int clearOnWin) {
 
 static void display(void)
 {
-    static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;36m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"}, {'#', "\033[1;33m#\033[0;0m"}, {'L', "\033[1;36mL\033[0;0m"} };
+    static const std::vector<std::pair<char, std::string>> reqColour = { {'@', "\033[1;32m@\033[0;0m"}, {'D', "\033[1;31mD\033[0;0m"}, {'$', "\033[1;36m$\033[0;0m"}, {'>', "\033[1;34m>\033[0;0m"}, {'Y', "\033[1;35mY\033[0;0m"}, {'#', "\033[1;33m#\033[0;0m"}, {'L', "\033[1;36mL\033[0;0m"}, {'S', "\033[1;36mS\033[0;0m"} };
     clearscreen(0U);
     for (int y = dims.y - 1; y >= 0; --y)
     {
@@ -207,6 +208,7 @@ static void display(void)
         else if (y == (dims.y - 3)) std::cout << "  Dynamite: " << dynamite;
         else if (y == (dims.y - 4)) std::cout << "  Steps:    " << steps;
         else if (y == (dims.y - 5)) std::cout << "  Life(s):  " << life;
+        else if (y == (dims.y - 6)) std::cout << "  Shields:  " << shield;
         std::cout << '\n';
     }
 }
@@ -223,6 +225,7 @@ static void create_level(void)
     place_feature(ENEMY, 4+level); 
     place_feature(EXIT, 1); 
     place_feature(LIFE, 1);
+    place_feature(SHIELD, 1);
     int orbchance = 10*(level-15);
     if( (std::rand()%100) < orbchance)
         place_feature(ORB, 1);
@@ -256,22 +259,26 @@ static void startgame(void)
     steps = 0;
     dynamite = 3;
     life = 1;
+    shield = 0;
     create_level();
 }
 
 // dynamite clears neighbour walls and enemies
-static void use_dynamite(void)
+static void useDynamiteOrShield(int useDynamite)
 {
-  --dynamite;
-  auto& vec = enemy_position_and_last_direction;
-  for(int i=0;i<4;++i)
-  {
-    auto p = (hero + nbo[i] + dims)%dims;
-    auto& m = mapelem(p);
-    if(bit_test(m, ENEMY))
-        vec.erase(std::remove_if(vec.begin(), vec.end(), [p](auto x){return x.first == p;}), vec.end());
-    bit_clear(m, ENEMY);
-    bit_set(m, FLOOR);
+    if (useDynamite == 1)
+        --dynamite;
+    else
+        --shield;
+    auto& vec = enemy_position_and_last_direction;
+    for(int i=0;i<4;++i)
+    {
+        auto p = (hero + nbo[i] + dims)%dims;
+        auto& m = mapelem(p);
+        if(bit_test(m, ENEMY))
+            vec.erase(std::remove_if(vec.begin(), vec.end(), [p](auto x){return x.first == p;}), vec.end());
+        bit_clear(m, ENEMY);
+        bit_set(m, FLOOR);
   }
 }
 
@@ -337,6 +344,11 @@ static void move(int feature_bit, ivec2& from, ivec2 to)
         ++life;
         bit_clear(mapelem(to), LIFE);
     }
+    else if (bit_test(v, HERO) && bit_test(v, SHIELD))
+    {
+        ++shield;
+        bit_clear(mapelem(to), SHIELD);
+    }
     else if (bit_test(v, HERO) && bit_test(v, ORB))
         win();
     else if (bit_test(v, HERO) && bit_test(v, EXIT))
@@ -401,10 +413,14 @@ int main(void) {
     {
         display();
         ch = read_key();
-        if (ch == keys[5]) // restart key pressed?
+        if (ch == keys[6]) // restart key pressed?
             startgame();
-        if(ch == keys[4] && dynamite > 0) // dynamite key pressed?
-            use_dynamite();
+        if (ch == keys[4] && dynamite > 0) // dynamite key pressed?
+            useDynamiteOrShield(1);
+        if (ch == keys[5] && shield > 0)
+        {
+            useDynamiteOrShield(0);
+        }
         else // might be a movement key then
             moveHero(); // Move Hero
 
