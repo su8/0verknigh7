@@ -224,8 +224,8 @@ static void create_level(void)
     place_feature(TREASURE, 10);
     place_feature(ENEMY, 4+level); 
     place_feature(EXIT, 1); 
-    place_feature(LIFE, 1);
-    place_feature(SHIELD, 1);
+    place_feature(LIFE, 4);
+    place_feature(SHIELD, 4);
     int orbchance = 10*(level-15);
     if( (std::rand()%100) < orbchance)
         place_feature(ORB, 1);
@@ -405,7 +405,7 @@ int main(void) {
 #endif /*_WIN32 */
     welcome(); // show welcome screen
     setup_keys(); // setup movement, dynamite and restart game keys
-    startgame(); 
+    startgame();
     while (true) // main loop
     {
         display();
@@ -414,7 +414,7 @@ int main(void) {
             startgame();
         if (ch == keys[4] && dynamite > 0) // dynamite key pressed?
             useDynamiteOrShield(1);
-        if (ch == keys[5] && shield > 0)
+        if (ch == keys[5] && shield > 0) // use shield
             useDynamiteOrShield(0);
         else // might be a movement key then
             moveHero(); // Move Hero
