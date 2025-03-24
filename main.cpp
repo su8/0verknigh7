@@ -51,7 +51,7 @@ int treasure = 0; // collected treasure
 int level = 0;
 int steps = 0;
 int dynamite = 0;
-int life = 1;
+int life = 0;
 int shield = 0;
 ivec2 hero;
 std::vector<std::pair<ivec2,int>> enemy_position_and_last_direction;
@@ -76,7 +76,7 @@ static void useDynamiteOrShield(int useDynamite);
 static void move(int feature_bit, ivec2& from, ivec2 to);
 static inline void moveEnemy(void);
 static inline void moveHero(void);
-static void win(void);
+static inline void win(void);
 static void welcome(void);
 
 #ifdef _WIN32
@@ -258,7 +258,7 @@ static void startgame(void)
     level = 0;
     steps = 0;
     dynamite = 3;
-    life = 1;
+    life = 0;
     shield = 0;
     create_level();
 }
@@ -328,7 +328,7 @@ static void move(int feature_bit, ivec2& from, ivec2 to)
     if (bit_test(v, HERO) && bit_test(v, ENEMY))
     {
         --life;
-        if (life == 0)
+        if (life < 0)
             startgame();
     }
     else if (bit_test(v, HERO) && bit_test(v, TREASURE))
