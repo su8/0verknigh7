@@ -39,6 +39,7 @@ struct ivec2 // our basic 2d point plus a few operations
     bool operator ==(ivec2 q) const {return x==q.x && y==q.y;}
 };
 
+std::mt19937 rng(std::random_device{}());
 enum {FLOOR =0, EXIT, TREASURE, ORB, ENEMY, LIFE, SHIELD, HERO}; // cell flags, in display order
 constexpr std::array<ivec2, 4> nbo{ivec2{1,0},{0,1},{-1,0},{0,-1}}; // direction offsets
 constexpr char symbols[] = ".>$YDLH@"; // symbols for the bit defines
@@ -136,11 +137,9 @@ static void setup_keys(void)
 // a step of the algorithm, given an active, carved cell
 static void create_iteration(ivec2 p)
 {
-    std::random_device rd;
-    std::mt19937 g(rd());
     // for each of the 4 directions, in random order
     std::array<int, 4> dir4_index{ 0,1,2,3 };
-    std::shuffle(dir4_index.begin(), dir4_index.end(), g);
+    std::shuffle(dir4_index.begin(), dir4_index.end(), rng);
     for (auto i : dir4_index)
     {
         auto nb = p + nbo[i] * 2; // get the nb coord
